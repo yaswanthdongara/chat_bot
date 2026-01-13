@@ -301,8 +301,8 @@ async function sendChatMessage() {
 }
 
 async function processAIResponse(history) {
-    // Try to get key from local storage first, then default
-    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
+    // Try to get key from local storage
+    const key = localStorage.getItem('ai_api_key');
 
     // Show loading indicator
     const loadingDiv = document.createElement('div');
