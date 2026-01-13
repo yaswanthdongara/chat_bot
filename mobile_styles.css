@@ -1,0 +1,78 @@
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+        height: 100vh; /* Fallback */
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-width: 100%;
+        border: none;
+    }
+
+    header {
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 0px;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+    }
+
+    /* Stack the header title and controls */
+    header h1 {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+
+    header div[style*="display: flex"] {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .theme-controls {
+        display: flex;
+        gap: 5px;
+    }
+
+    .chat-section {
+        height: auto;
+        flex-grow: 1;
+        width: 100%;
+    }
+
+    .chat-history {
+        padding: 10px;
+    }
+
+    .chat-input-area {
+        padding: 5px 10px;
+        /* Ensure input area doesn't get covered by soft keyboard on some devices */
+        padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+        flex-shrink: 0;
+    }
+
+    #chatInput {
+        font-size: 16px; /* Prevents auto-zoom on iOS */
+    }
+
+    .cmd-prompt {
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 15px;
+    }
+}

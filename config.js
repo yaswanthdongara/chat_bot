@@ -1,0 +1,1 @@
+const DEFAULT_AI_KEY = "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";

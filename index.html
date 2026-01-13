@@ -1,253 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Chatbot</title>
-  <style>
-    body{
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-    }
-    .chat-widget {
-        width: 100%;
-        max-width: 600px;
-        height: 80vh;
-        display: flex;
-        flex-direction: column;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        background-color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    header {
-        text-align: center;
-        padding: 15px;
-        border-bottom: 1px solid #eee;
-    }
-    header h1 {
-        margin: 0;
-    }
-    main#chat-container {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    footer {
-        padding: 15px;
-        border-top: 1px solid #eee;
-    }
-    #chat-form {
-        display: flex;
-        gap: 10px;
-    }
-    #message-input {
-        flex: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 16px;
-    }
-    button {
-        padding: 10px 15px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    button:disabled {
-        background-color: #a0cfff;
-        cursor: not-allowed;
-    }
-    /* Styles for message alignment */
-    .user, .ai {
-        display: flex;
-        flex-direction: column;
-    }
-    .user {
-        align-items: flex-end;
-    }
-    .ai {
-        align-items: flex-start;
-    }
-    .ai.error .message-bubble {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    .message-bubble {
-        padding: 10px 15px;
-        border-radius: 18px;
-        max-width: 80%;
-    }
-    .user .message-bubble {
-        background-color: #007bff;
-        color: white;
-    }
-    .ai .message-bubble {
-        background-color: #e9e9eb;
-        color: black;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Syncer - AI Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="cmd_styles.css">
+    <link rel="stylesheet" href="mobile_styles.css">
+    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        (function() {
+            // Theme Loader
+            const savedTheme = localStorage.getItem('theme') || 'theme-black';
+            document.documentElement.className = savedTheme;
+
+            // Wallpaper Loader (Prevents Flash)
+            const url = localStorage.getItem('wallpaper_url') || '';
+            const imageData = localStorage.getItem('wallpaper_image_data') || '';
+            const effect = localStorage.getItem('wallpaper_effect') || 'normal';
+            const blur = localStorage.getItem('wallpaper_blur') || '5';
+            const transparent = localStorage.getItem('wallpaper_transparent') === 'true';
+            const opacity = localStorage.getItem('wallpaper_opacity') || '80';
+
+            document.addEventListener('DOMContentLoaded', () => {
+                let wallpaperDiv = document.getElementById('wallpaper-background');
+                if (!wallpaperDiv) {
+                    wallpaperDiv = document.createElement('div');
+                    wallpaperDiv.id = 'wallpaper-background';
+                    document.body.prepend(wallpaperDiv);
+                }
+
+                const hasImage = url || imageData;
+                if (hasImage) {
+                    wallpaperDiv.style.backgroundImage = `url('${imageData || url}')`;
+                    wallpaperDiv.style.opacity = '1';
+                    document.body.style.backgroundColor = 'transparent';
+                } else {
+                    wallpaperDiv.style.backgroundImage = 'none';
+                    wallpaperDiv.style.opacity = '0';
+                    document.body.style.backgroundColor = '';
+                }
+
+                if (effect === 'blur') {
+                    wallpaperDiv.style.filter = `blur(${blur}px)`;
+                } else {
+                    wallpaperDiv.style.filter = 'none';
+                }
+            });
+        })();
+    </script>
 </head>
-<body>
-  <div class="chat-widget">
+<body style="padding: 0; overflow: hidden;">
+    <div class="full-screen-layout" style="grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 0; height: 100vh; padding: 10px;">
+        <header style="margin-bottom: 0; padding-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); align-items: center;">
+            <div style="font-family: 'Consolas', 'Courier New', monospace; font-weight: bold;">C:\> AI_Chat.exe</div>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="theme-controls">
+                    <span style="margin-right: 5px; font-size: 0.8em;">Theme:</span>
+                    <button class="cmd-btn" onclick="setCmdTheme('theme-cmd-white')" title="Black & White">B/W</button>
+                    <button class="cmd-btn" onclick="setCmdTheme('theme-cmd-green')" title="Black & Green">GRN</button>
+                    <button class="cmd-btn" onclick="setCmdTheme('theme-cmd-red')" title="Black & Red">RED</button>
+                </div>
+                <button id="configBtn" class="cmd-btn" title="Configuration">[Config]</button>
+            </div>
+        </header>
 
-    <!-- Header -->
-    <header>
-      <h1>Yaswanth Dongara</h1>
-    </header>
+        <!-- Configuration Modal -->
+        <div id="configModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>SYSTEM_CONFIG</h2>
+                    <span id="closeConfigBtn" class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="aiKeyInput">API_KEY (OpenRouter)</label>
+                        <input type="password" id="aiKeyInput" class="text-input" placeholder="sk-or-...">
+                        <p style="font-size: 0.8rem; margin-top: 5px; opacity: 0.7;">
+                            Required for AI functionality. Keys are stored locally. 
+                            <a href="https://openrouter.ai/keys" target="_blank" style="color: var(--primary-color);">[GET_NEW_KEY]</a>
+                        </p>
+                    </div>
+                    <button id="saveConfigBtn" class="btn">[SAVE_CHANGES]</button>
+                </div>
+            </div>
+        </div>
 
-    <!-- Chat Container -->
-    <main id="chat-container">
-      <!-- Messages will be added here -->
-    </main>
+        <div class="chat-section" style="display: flex; flex-direction: column; height: 100%; width: 100%; padding: 0; overflow: hidden;">
+            <div id="chatHistory" class="chat-history" style="flex-grow: 1; overflow-y: auto; padding: 20px; border: none; border-radius: 0; background: transparent; margin-bottom: 0;">
+                <!-- Chat messages will appear here -->
+                <div class="chat-welcome" style="text-align: center; opacity: 0.7; margin-top: 50px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" x2="8" y1="16" y2="16"/><line x1="16" x2="16" y1="16" y2="16"/></svg>
+                    <p>Start a conversation with the AI...</p>
+                </div>
+                
+                <!-- Input Area (Moved Inside History) -->
+                <div id="chatInputArea" class="chat-input-area" style="display: flex; gap: 0px; align-items: flex-start; padding: 0; border: none; background: transparent; width: 100%; margin-top: 10px;">
+                    <span class="cmd-prompt" style="padding-top: 0px; padding-right: 0px; color: var(--text-color); font-family: inherit; font-weight: normal; user-select: none;">C:\Users\Admin&gt;&nbsp;</span>
+                    <textarea id="chatInput" class="text-input" placeholder="" rows="1" style="flex-grow: 1; min-height: 24px; resize: none; border: none; background: transparent; padding: 0; overflow-y: hidden; font-family: inherit; color: var(--text-color); outline: none; caret-color: var(--text-color); border-radius: 0;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Input Form -->
-    <footer>
-      <form id="chat-form">
-        <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
-        <button type="submit">Send</button>
-      </form>
-    </footer>
-  </div>
-
-  <script>
-    const chatForm = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message-input');
-    const chatContainer = document.getElementById('chat-container');
-    const submitButton = chatForm.querySelector('button[type="submit"]');
-
-    let chatHistory = [];
-    // WARNING: Exposing API keys in client-side code is not secure.
-    let geminiApiKey = 'AIzaSyAbDTrPsmld91eG20PEGJl0wGV872naodM'; 
-
-    document.addEventListener('DOMContentLoaded', () => {
-      messageInput.disabled = false;
-      submitButton.disabled = false;
-      messageInput.placeholder = "Type your message...";
-      chatContainer.innerHTML = '';
-      appendMessage("Hello! I'm an AI assistant. How can I help you today?", 'ai');
-      // It's good practice to set a persona for the AI.
-      chatHistory = [{
-        role: "model",
-        parts: [{ text: "You are a helpful and friendly AI assistant." }]
-      }];
-    });
-
-    chatForm.addEventListener('submit', handleFormSubmit);
-
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      const userInput = messageInput.value.trim();
-      if (!userInput) return;
-      toggleForm(false);
-      appendMessage(userInput, 'user');
-      chatHistory.push({ role: "user", parts: [{ text: userInput }] });
-      messageInput.value = '';
-      const typingIndicator = showTypingIndicator();
-
-      try {
-        const aiResponse = await getAIResponse(chatHistory);
-        chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-        typingIndicator.remove();
-        appendMessage(aiResponse, 'ai');
-      } catch (error) {
-        console.error("Error fetching AI response:", error);
-        typingIndicator.remove();
-        appendMessage("An error occurred. Please check the console and ensure your API key is correct.", 'ai', true);
-      } finally {
-        toggleForm(true);
-      }
-    }
-
-    async function getAIResponse(history) {
-      if (!geminiApiKey) {
-        throw new Error("API Key is not set.");
-      }
-      // CORRECTED: Added backticks (`) to create a template literal string.
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-      const payload = { contents: history };
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        // CORRECTED: Added backticks (`) to create a template literal string.
-        throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-      }
-
-      const result = await response.json();
-      if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
-        return result.candidates[0].content.parts[0].text;
-      } else {
-        console.warn("Unexpected API response structure:", result);
-        if (result.error) {
-          // CORRECTED: Added backticks (`) to create a template literal string.
-          return `API Error: ${result.error.message}`;
-        }
-        return "I received an empty or invalid response from the AI.";
-      }
-    }
-
-    function appendMessage(text, role, isError = false) {
-      const messageWrapper = document.createElement('div');
-      // Using classList for better class management
-      messageWrapper.classList.add(role);
-
-      const messageBubble = document.createElement('div');
-      messageBubble.className = 'message-bubble';
-      messageBubble.textContent = text;
-
-      if (isError) {
-        messageWrapper.classList.add('error');
-      }
-
-      messageWrapper.appendChild(messageBubble);
-      chatContainer.appendChild(messageWrapper);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    function showTypingIndicator() {
-      const indicatorWrapper = document.createElement('div');
-      indicatorWrapper.id = 'typing-indicator';
-      indicatorWrapper.className = 'ai';
-      
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-      
-      const dot1 = document.createElement('span');
-      dot1.textContent = '.';
-      const dot2 = document.createElement('span');
-      dot2.textContent = '.';
-      const dot3 = document.createElement('span');
-      dot3.textContent = '.';
-      
-      bubble.append(dot1, dot2, dot3);
-      indicatorWrapper.appendChild(bubble);
-      chatContainer.appendChild(indicatorWrapper);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-      return indicatorWrapper;
-    }
-
-    function toggleForm(isEnabled) {
-      messageInput.disabled = !isEnabled;
-      submitButton.disabled = !isEnabled;
-      if (isEnabled) {
-        messageInput.focus();
-      }
-    }
-  </script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

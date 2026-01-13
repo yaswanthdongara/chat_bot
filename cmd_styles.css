@@ -1,0 +1,164 @@
+
+/* CMD Specific Styles - Exact Terminal Version */
+
+/* Global Font Override for this mode */
+body, button, input, textarea, select {
+    font-family: 'Consolas', 'Lucida Console', 'Courier New', monospace !important;
+}
+
+/* Header Buttons */
+.cmd-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+.cmd-btn:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* Chat History Area */
+.chat-history {
+    padding: 10px !important;
+    font-size: 1rem;
+    line-height: normal;
+}
+
+/* Message Container */
+.chat-message {
+    margin-bottom: 5px;
+    display: block !important; 
+    padding: 0 !important;
+}
+
+/* Hide the default sender label "You" / "AI" */
+.chat-sender {
+    display: none !important;
+}
+
+/* The Message Text (Bubble) */
+.chat-bubble {
+    border-radius: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    color: var(--text-color) !important;
+    display: inline-block;
+    width: 100%;
+    white-space: pre-wrap;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+/* User Message specific: Add Prompt */
+.chat-message.user .chat-bubble::before {
+    content: "C:\\Users\\Admin> ";
+    opacity: 1;
+    font-weight: normal;
+    margin-right: 0px;
+}
+
+/* AI Message specific */
+.chat-message.ai .chat-bubble {
+    margin-top: 5px;
+    margin-bottom: 20px;
+    padding-left: 0px; 
+}
+
+/* Code Blocks in CMD style */
+.code-block-wrapper {
+    margin: 10px 0;
+    border: 1px dashed var(--border-color); 
+    background: transparent !important;
+}
+.code-block-header {
+    background: transparent !important;
+    border-bottom: 1px dashed var(--border-color);
+    padding: 2px 10px;
+}
+.code-block-header span {
+    text-transform: uppercase;
+}
+code {
+    background: transparent !important;
+    color: var(--text-color) !important;
+    font-family: inherit !important;
+}
+pre {
+    background: transparent !important;
+    padding: 10px;
+}
+
+/* Modal Styling */
+.modal-content {
+    border: 2px solid var(--text-color);
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--bg-color);
+}
+.modal-header {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border-bottom: none;
+}
+.modal-header h2 {
+    font-size: 1.2rem;
+    font-family: inherit;
+    text-transform: uppercase;
+}
+.close {
+    color: var(--bg-color); 
+    opacity: 1;
+}
+.close:hover {
+    color: var(--bg-color);
+    background: transparent;
+    text-decoration: underline;
+}
+.btn {
+    border-radius: 0;
+    text-transform: uppercase;
+    border: 1px solid var(--text-color);
+    background: transparent;
+    color: var(--text-color);
+}
+.btn:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* Input Area overrides */
+textarea:focus, input:focus {
+    box-shadow: none !important;
+    border-color: transparent !important;
+    outline: none !important;
+}
+
+/* Make sure the input looks like part of the command line */
+#chatInput {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding-left: 0;
+    font-family: inherit !important;
+    font-size: inherit;
+}
+
+/* Scrollbar styling for Webkit */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border: 1px solid var(--bg-color);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-color);
+}
