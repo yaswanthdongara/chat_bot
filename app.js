@@ -6,25 +6,10 @@
 // Chat Elements
 const chatHistory = document.getElementById('chatHistory');
 const chatInput = document.getElementById('chatInput');
-const chatSendBtn = document.getElementById('chatSendBtn');
-const chatClearBtn = document.getElementById('chatClearBtn');
-const chatExportPdfBtn = document.getElementById('chatExportPdfBtn');
-
-// Wallpaper Elements
-const wallpaperUrlInput = document.getElementById('wallpaperUrlInput');
-const wallpaperFileInput = document.getElementById('wallpaperFileInput');
-const wallpaperEffectSelect = document.getElementById('wallpaperEffectSelect');
-const wallpaperBlurRange = document.getElementById('wallpaperBlurRange');
-const wallpaperBlurValue = document.getElementById('wallpaperBlurValue');
-const wallpaperTransparentCheckbox = document.getElementById('wallpaperTransparentCheckbox');
-const wallpaperOpacityRange = document.getElementById('wallpaperOpacityRange');
-const wallpaperOpacityValue = document.getElementById('wallpaperOpacityValue');
-const wallpaperOpacityGroup = document.getElementById('wallpaperOpacityGroup');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Chat App Initialized');
-    initWallpaper();
     setupEventListeners();
     loadTheme(); // Just applies the class
     
@@ -34,11 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Chat Page Listeners
-    if (chatSendBtn) chatSendBtn.addEventListener('click', sendChatMessage);
-    if (chatClearBtn) chatClearBtn.addEventListener('click', clearChatHistory);
-    if (chatExportPdfBtn) chatExportPdfBtn.addEventListener('click', exportChatToPDF);
-    
     if (chatInput) {
         // Auto-resize textarea
         chatInput.addEventListener('input', function() {
@@ -66,23 +46,6 @@ function setupEventListeners() {
                      chatInput.focus();
                  }
             }
-        });
-    }
-
-    // Wallpaper Listeners (Optional, if elements exist)
-    if (wallpaperUrlInput) wallpaperUrlInput.addEventListener('input', saveWallpaperSettings);
-    if (wallpaperEffectSelect) {
-        wallpaperEffectSelect.addEventListener('change', () => {
-            saveWallpaperSettings();
-            if (wallpaperBlurRange && wallpaperBlurRange.parentElement) {
-                wallpaperBlurRange.parentElement.style.display = wallpaperEffectSelect.value === 'blur' ? 'flex' : 'none';
-            }
-        });
-    }
-    if (wallpaperBlurRange) {
-        wallpaperBlurRange.addEventListener('input', () => {
-            if (wallpaperBlurValue) wallpaperBlurValue.textContent = wallpaperBlurRange.value + 'px';
-            saveWallpaperSettings();
         });
     }
 
@@ -418,187 +381,4 @@ async function retryLastMessage() {
     
     const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
     await processAIResponse(history);
-}
-
-function clearChatHistory() {
-    if (confirm('Are you sure you want to clear the chat history?')) {
-        localStorage.removeItem('chat_history');
-        loadChatHistory();
-    }
-}
-
-function exportChatToPDF() {
-    const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
-    if (history.length === 0) {
-        alert('No chat history to export.');
-        return;
-    }
-
-    // Check if html2pdf is loaded
-    if (typeof html2pdf === 'undefined') {
-        alert('PDF export library not loaded. Please check your internet connection.');
-        return;
-    }
-
-    // Create a temporary container for PDF generation
-    const element = document.createElement('div');
-    element.style.padding = '20px';
-    element.style.fontFamily = 'Arial, sans-serif';
-    element.style.color = '#000';
-    element.style.background = '#fff';
-
-    const title = document.createElement('h1');
-    title.textContent = 'Code Syncer - AI Chat History';
-    title.style.borderBottom = '2px solid #333';
-    title.style.paddingBottom = '10px';
-    element.appendChild(title);
-
-    const date = document.createElement('p');
-    date.textContent = `Date: ${new Date().toLocaleDateString()}`;
-    date.style.marginBottom = '20px';
-    date.style.color = '#666';
-    element.appendChild(date);
-
-    history.forEach(msg => {
-        const msgDiv = document.createElement('div');
-        msgDiv.style.marginBottom = '15px';
-        msgDiv.style.padding = '10px';
-        msgDiv.style.borderRadius = '5px';
-        msgDiv.style.backgroundColor = msg.role === 'user' ? '#f0f7ff' : '#f0f0f0';
-        msgDiv.style.borderLeft = msg.role === 'user' ? '4px solid #007bff' : '4px solid #6c757d';
-
-        const role = document.createElement('strong');
-        role.textContent = msg.role === 'user' ? 'You:' : 'AI:';
-        role.style.display = 'block';
-        role.style.marginBottom = '5px';
-        role.style.color = '#333';
-        msgDiv.appendChild(role);
-
-        const content = document.createElement('div');
-        // Simple formatting for code blocks in PDF
-        let formattedContent = msg.content
-            .replace(/```(\w*)([\s\S]*?)```/g, '<pre style="background:#333; color:#fff; padding:10px; border-radius:4px; overflow-x:hidden; white-space:pre-wrap;">$2</pre>')
-            .replace(/\n/g, '<br>');
-        
-        content.innerHTML = formattedContent;
-        content.style.color = '#444';
-        msgDiv.appendChild(content);
-
-        element.appendChild(msgDiv);
-    });
-
-    const opt = {
-        margin: 10,
-        filename: `chat-history-${new Date().toISOString().slice(0, 10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // Generate PDF
-    html2pdf().set(opt).from(element).save();
-}
-
-// ===================================
-// WALLPAPER LOGIC
-// ===================================
-
-function initWallpaper() {
-    // Wallpaper div is now created in head script to prevent flash
-    let wallpaperDiv = document.getElementById('wallpaper-background');
-    if (!wallpaperDiv) {
-        wallpaperDiv = document.createElement('div');
-        wallpaperDiv.id = 'wallpaper-background';
-        document.body.prepend(wallpaperDiv);
-    }
-    
-    // Load current settings but don't crash if inputs are missing
-    loadAndApplyWallpaper();
-}
-
-function loadAndApplyWallpaper() {
-    const url = localStorage.getItem('wallpaper_url') || '';
-    const imageData = localStorage.getItem('wallpaper_image_data') || '';
-    const effect = localStorage.getItem('wallpaper_effect') || 'normal';
-    const blur = localStorage.getItem('wallpaper_blur') || '5';
-    const transparent = localStorage.getItem('wallpaper_transparent') === 'true';
-    const opacity = localStorage.getItem('wallpaper_opacity') || '80';
-
-    applyWallpaper(url, imageData, effect, blur, transparent, opacity);
-}
-
-function applyWallpaper(url, imageData, effect, blur, transparent, opacity) {
-    const wallpaperDiv = document.getElementById('wallpaper-background');
-    if (!wallpaperDiv) return;
-
-    const hasImage = url || imageData;
-
-    if (hasImage) {
-        wallpaperDiv.style.backgroundImage = `url('${imageData || url}')`;
-        wallpaperDiv.style.opacity = '1';
-        // Make body background transparent so wallpaper shows
-        document.body.style.backgroundColor = 'transparent';
-    } else {
-        wallpaperDiv.style.backgroundImage = 'none';
-        wallpaperDiv.style.opacity = '0';
-        document.body.style.backgroundColor = '';
-    }
-
-    if (effect === 'blur') {
-        wallpaperDiv.style.filter = `blur(${blur}px)`;
-    } else {
-        wallpaperDiv.style.filter = 'none';
-    }
-
-    // Container Transparency
-    if (transparent && hasImage) {
-        const opacityVal = parseInt(opacity) / 100;
-        
-        // Get original theme colors from HTML element (computed style)
-        const computedStyle = getComputedStyle(document.documentElement);
-        const cardBg = computedStyle.getPropertyValue('--card-bg').trim();
-        const inputBg = computedStyle.getPropertyValue('--input-bg').trim();
-        
-        // Helper to convert hex to rgba
-        const hexToRgba = (hex, alpha) => {
-            let r = 0, g = 0, b = 0;
-            if (!hex) return `rgba(22, 27, 34, ${alpha})`; // Default fallback
-
-            if (hex.startsWith('#')) {
-                if (hex.length === 4) {
-                    r = parseInt(hex[1] + hex[1], 16);
-                    g = parseInt(hex[2] + hex[2], 16);
-                    b = parseInt(hex[3] + hex[3], 16);
-                } else if (hex.length === 7) {
-                    r = parseInt(hex[1] + hex[2], 16);
-                    g = parseInt(hex[3] + hex[4], 16);
-                    b = parseInt(hex[5] + hex[6], 16);
-                }
-            }
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        };
-
-        document.body.style.setProperty('--card-bg', hexToRgba(cardBg, opacityVal));
-        document.body.style.setProperty('--input-bg', hexToRgba(inputBg, opacityVal));
-    } else {
-        document.body.style.removeProperty('--card-bg');
-        document.body.style.removeProperty('--input-bg');
-    }
-}
-
-function saveWallpaperSettings() {
-    const newUrl = wallpaperUrlInput ? wallpaperUrlInput.value.trim() : '';
-    const oldUrl = localStorage.getItem('wallpaper_url');
-    
-    if (newUrl && newUrl !== oldUrl) {
-        localStorage.removeItem('wallpaper_image_data'); // Clear uploaded image if URL changes
-    }
-
-    if (wallpaperUrlInput) localStorage.setItem('wallpaper_url', newUrl);
-    if (wallpaperEffectSelect) localStorage.setItem('wallpaper_effect', wallpaperEffectSelect.value);
-    if (wallpaperBlurRange) localStorage.setItem('wallpaper_blur', wallpaperBlurRange.value);
-    if (wallpaperTransparentCheckbox) localStorage.setItem('wallpaper_transparent', wallpaperTransparentCheckbox.checked);
-    if (wallpaperOpacityRange) localStorage.setItem('wallpaper_opacity', wallpaperOpacityRange.value);
-    
-    loadAndApplyWallpaper();
 }
